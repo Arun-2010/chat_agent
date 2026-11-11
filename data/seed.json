@@ -1,0 +1,32 @@
+[
+  {
+    "role": "user",
+    "content": "I'm building a small side-project app (a Next.js booking tool, maybe 200 users to start). What are good managed Postgres hosting options and what do they cost?",
+    "created_at": "2026-11-03T10:14:00+05:30"
+  },
+  {
+    "role": "assistant",
+    "content": "For a small app with around 200 users, four managed Postgres hosts are worth a look:\n\n| Provider | Entry paid plan | Free tier | Notes |\n|---|---|---|---|\n| Neon | Launch, $19/month | Yes, 0.5 GB storage | Serverless, scales to zero, database branching |\n| Supabase | Pro, $25/month | Yes, 500 MB database, pauses after a week idle | Postgres plus auth, storage and realtime |\n| Railway | Hobby, $5/month plus usage | No, trial credit only | Simple deploys, app and database in one place |\n| Render | Basic Postgres from $6/month | Yes, expires after 30 days | Predictable fixed pricing |\n\n**My pick for you:** start on Neon's free tier. Scale-to-zero suits a booking tool with bursty traffic, and the $19 Launch plan is the natural next step. Choose Supabase instead if you also want auth and file storage from the same vendor.\n\nAs of Tuesday, 3 November 2026.",
+    "created_at": "2026-11-03T10:14:40+05:30"
+  },
+  {
+    "role": "user",
+    "content": "Give me three subject lines for a cold outreach email to heads of sales at logistics companies.",
+    "created_at": "2026-11-06T16:02:00+05:30"
+  },
+  {
+    "role": "assistant",
+    "content": "Three options, each under 45 characters so they survive mobile previews:\n\n1. \"Cutting quote turnaround at {{company}}\"\n2. \"A question about your dispatch-to-sales handoff\"\n3. \"How 3PL sales teams are shortening deal cycles\"\n\nThe first usually wins on open rate because it names a concrete outcome and the recipient's company.",
+    "created_at": "2026-11-06T16:02:25+05:30"
+  },
+  {
+    "role": "user",
+    "content": "We shortlisted 5 CRM tools for our 20-person sales team: HubSpot, Pipedrive, Zoho CRM, Freshsales and Close. Can you compare them on pricing per seat?",
+    "created_at": "2026-11-09T09:40:00+05:30"
+  },
+  {
+    "role": "assistant",
+    "content": "Here is the shortlist on entry-level paid pricing, billed annually, and what it means for 20 seats:\n\n| Tool | Plan | Price per seat / month | 20 seats / month | Notes |\n|---|---|---|---|---|\n| HubSpot | Sales Hub Starter | $20 | $400 | Free CRM underneath; Professional jumps to $100 per seat |\n| Pipedrive | Lite | $14 | $280 | Pipeline-first; automations start on the Growth plan |\n| Zoho CRM | Standard | $14 | $280 | Cheapest route to custom modules; Professional is $23 |\n| Freshsales | Growth | $9 | $180 | Built-in phone and email; Pro is $39 |\n| Close | Essentials | $35 | $700 | Built for calling-heavy teams; power dialer on Growth at $99 |\n\n**For a 20-person team:** Freshsales is the cheapest at about $180/month, Pipedrive and Zoho tie at $280, and Close costs the most but includes calling that the others charge extra for. If your reps live on the phone, Close can still come out ahead once you add a dialer to the others.\n\nAs of Monday, 9 November 2026.",
+    "created_at": "2026-11-09T09:40:45+05:30"
+  }
+]

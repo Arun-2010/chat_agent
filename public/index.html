@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recall</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<style>
+:root{--ink:#1e2233;--muted:#6b7286;--line:#e6e8f0;--accent:#6d5df6;--grad:linear-gradient(90deg,#7c5cf6,#d946a8)}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;display:flex;flex-direction:column;font:15px/1.55 "Segoe UI",system-ui,sans-serif;color:var(--ink);background:#f7f8fc}
+button,input{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:14px;padding:18px 28px 14px;flex-wrap:wrap}
+header h1{margin:0;font-size:26px;font-weight:600}
+header p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.controls{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;box-shadow:0 1px 2px #1e22330d}
+.btn:hover{border-color:#c9cde0}
+.btn.primary{border:0;color:#fff;background:var(--grad);box-shadow:0 4px 14px #7c5cf64d}
+.clock{display:flex;flex-direction:column;font-size:12.5px;color:var(--muted)}
+.clock input{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px}
+.layout{flex:1;min-height:0;display:flex;gap:22px;padding:0 28px 22px}
+aside,.chat{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px #1e22330a}
+aside{width:250px;overflow-y:auto;flex-shrink:0}
+aside .head{padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+aside .head b{display:block}
+aside small,.group{color:var(--muted);font-size:12px}
+.group{padding:14px 18px 4px;letter-spacing:.06em;text-transform:uppercase}
+.day{display:block;width:calc(100% - 20px);margin:2px 10px;padding:9px 12px;border:0;border-left:3px solid transparent;border-radius:10px;background:none;text-align:left;cursor:pointer}
+.day:hover{background:#f1f0ff;border-left-color:var(--accent)}
+.day span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day small{display:block}
+.chat{flex:1;min-width:0;display:flex;flex-direction:column}
+#messages{flex:1;overflow-y:auto;padding:22px 34px}
+.empty{color:var(--muted);text-align:center;margin-top:12vh}
+.msg{display:flex;gap:12px;margin-bottom:18px}
+.msg.user{justify-content:flex-end}
+.bubble{max-width:82%;padding:13px 18px;border-radius:14px;overflow-wrap:anywhere}
+.user .bubble{border:1.5px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--grad) border-box;white-space:pre-wrap}
+.assistant .bubble{background:#fff;border:1px solid var(--line);box-shadow:0 2px 8px #1e22330f}
+.avatar{width:36px;height:36px;flex-shrink:0;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:600}
+.bubble p{margin:0 0 9px}.bubble p:last-child{margin-bottom:0}
+.bubble ul,.bubble ol{margin:0 0 9px;padding-left:22px}
+.bubble h1,.bubble h2,.bubble h3{font-size:15.5px;margin:12px 0 6px}
+.bubble a{color:var(--accent)}
+.bubble table{border-collapse:collapse;margin:8px 0;font-size:14px;display:block;overflow-x:auto}
+.bubble th,.bubble td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.bubble th{background:#f5f5fb}
+.status{color:var(--muted);font-size:13px;margin-bottom:6px}
+.status::before{content:"";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.error{color:#b42318}
+details{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#f8f8fc;font-size:13px}
+summary{padding:8px 12px;cursor:pointer;color:var(--muted)}
+details ul{margin:0;padding:0 12px 10px 30px}
+details small{color:var(--muted)}
+.starters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 22px 0;border-top:1px solid var(--line)}
+.starter{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left;cursor:pointer;box-shadow:0 1px 3px #1e22330d}
+.starter:hover{border-color:var(--accent)}
+.starter b{display:block;font-weight:600}
+.starter small{color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+form{display:flex;gap:10px;padding:14px 22px 18px}
+form input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:12px;outline:none}
+form input:focus{border-color:var(--accent)}
+@media(max-width:820px){aside{display:none}.starters{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Recall</h1><p>A chat agent with one tool, web search, and a memory of what you asked and when.</p></div>
+  <div class="controls">
+    <label class="clock">Pretend today is (for testing memory)<input type="date" id="fakeNow"></label>
+    <span class="clock">Effective date<b id="effective">…</b></span>
+    <button class="btn" id="seed" title="Loads sample conversations from data/seed.json">Load demo history</button>
+    <button class="btn primary" id="newChat">+ New Chat</button>
+  </div>
+</header>
+<div class="layout">
+  <aside><div class="head"><b>Memory</b><small>Days with stored conversations</small></div><div id="days"></div></aside>
+  <section class="chat">
+    <div id="messages"></div>
+    <div class="starters" id="starters"></div>
+    <form id="form"><input id="input" autocomplete="off" placeholder='Ask anything, or refer to a past day: "Last Tuesday I asked you about…"'><button class="btn primary">Send</button></form>
+  </section>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const STARTERS = [
+  ['CRM shortlist', 'On Monday we shortlisted 5 CRM tools for a 20-person sales team. Has any of them changed pricing or shipped something big since?'],
+  ['Recall a date', 'What did I ask you on 3 November? Is your answer still correct today?'],
+  ['Postgres hosting', 'Last Tuesday I asked you about Postgres hosting. Has any pricing changed since then?'],
+  ['Fresh question', "What's the latest stable Node.js version?"],
+];
+let conversationId = localStorage.getItem('recall.conversation') || newConversation();
+let fakeNow = localStorage.getItem('recall.fakeNow') || '';
+let today = '';
+let busy = false;
+
+function newConversation() {
+  const id = crypto.randomUUID();
+  localStorage.setItem('recall.conversation', id);
+  return id;
+}
+const withNow = (url) => (fakeNow ? `${url}${url.includes('?') ? '&' : '?'}now=${encodeURIComponent(fakeNow)}` : url);
+const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Model output can quote web pages, so rendered markdown is always sanitised; without the CDN it falls back to plain text.
+const markdown = (text) => (window.marked && window.DOMPurify ? DOMPurify.sanitize(marked.parse(text)) : escapeHtml(text).replace(/\n/g, '<br>'));
+const longDate = (day, opts) => new Date(`${day}T12:00:00Z`).toLocaleDateString('en-GB', { timeZone: 'UTC', ...opts });
+
+function addMessage(role, text) {
+  $('messages').querySelector('.empty')?.remove();
+  const row = document.createElement('div');
+  row.className = `msg ${role}`;
+  row.innerHTML = role === 'assistant' ? '<div class="avatar">R</div><div class="bubble"><div class="status" hidden></div><div class="body"></div></div>' : '<div class="bubble"></div>';
+  if (role === 'user') row.querySelector('.bubble').textContent = text;
+  else row.querySelector('.body').innerHTML = markdown(text);
+  $('messages').append(row);
+  for (const a of row.querySelectorAll('a')) a.target = '_blank';
+  $('messages').scrollTop = $('messages').scrollHeight;
+  return row;
+}
+
+function showEmpty() {
+  $('messages').innerHTML = '<p class="empty">Ask something new, or pick a day on the left to check an old answer.</p>';
+}
+
+async function refresh() {
+  const health = await (await fetch(withNow('/api/health'))).json();
+  today = health.today;
+  $('effective').textContent = longDate(today, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const days = await (await fetch('/api/days')).json();
+  const yesterday = new Date(Date.parse(`${today}T12:00:00Z`) - 864e5).toISOString().slice(0, 10);
+  let group = '';
+  $('days').innerHTML = days.length ? '' : '<p class="group">Nothing stored yet</p>';
+  for (const d of days) {
+    const label = d.day === today ? 'Today' : d.day === yesterday ? 'Yesterday' : d.day > today ? 'Later' : 'Earlier';
+    if (label !== group) $('days').insertAdjacentHTML('beforeend', `<div class="group">${(group = label)}</div>`);
+    const button = document.createElement('button');
+    button.className = 'day';
+    button.innerHTML = `<span>${escapeHtml(d.snippets[0] || '(no question)')}</span><small>${longDate(d.day, { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.count} messages</small>`;
+    button.onclick = () => {
+      $('input').value = `What did I ask you on ${longDate(d.day, { day: 'numeric', month: 'long' })}? Is your answer still correct today?`;
+      $('input').focus();
+    };
+    $('days').append(button);
+  }
+}
+
+async function loadHistory() {
+  const history = await (await fetch(`/api/history?conversationId=${conversationId}`)).json();
+  showEmpty();
+  for (const m of history) addMessage(m.role, m.content);
+}
+
+function send(message) {
+  if (busy || !message.trim()) return;
+  busy = true;
+  addMessage('user', message);
+  const row = addMessage('assistant', '');
+  const status = row.querySelector('.status');
+  const body = row.querySelector('.body');
+  const setStatus = (text) => { status.textContent = text; status.hidden = !text; };
+  let text = '';
+  setStatus('Thinking…');
+  const es = new EventSource(withNow(`/api/chat?conversationId=${conversationId}&message=${encodeURIComponent(message)}`));
+  // EventSource reconnects by itself when a stream ends, which would re-send the message; always close it explicitly.
+  const finish = (error) => {
+    es.close();
+    busy = false;
+    setStatus('');
+    if (error) body.insertAdjacentHTML('beforeend', `<p class="error">${escapeHtml(error)}</p>`);
+    for (const a of row.querySelectorAll('a')) a.target = '_blank';
+    refresh();
+  };
+  es.onmessage = (e) => {
+    const event = JSON.parse(e.data);
+    if (event.type === 'token') {
+      text += event.text;
+      setStatus('');
+      body.innerHTML = markdown(text);
+    } else if (event.type === 'status') {
+      text = ''; // anything said before a search is not part of the answer
+      body.innerHTML = '';
+      setStatus(event.text);
+    } else if (event.type === 'sources') {
+      const items = event.items.map((s) => `<li><a href="${escapeHtml(s.url)}">${escapeHtml(s.title)}</a> <small>${escapeHtml(new URL(s.url).hostname)} · published ${escapeHtml(s.publishedDate || 'unknown')}</small></li>`);
+      row.querySelector('.bubble').insertAdjacentHTML('beforeend', DOMPurifySafe(`<details><summary>Sources (${items.length})</summary><ul>${items.join('')}</ul></details>`));
+    } else if (event.type === 'done') finish();
+    else if (event.type === 'error') finish(event.message);
+    $('messages').scrollTop = $('messages').scrollHeight;
+  };
+  es.onerror = () => finish(text ? '' : 'Connection lost before an answer arrived.');
+}
+const DOMPurifySafe = (html) => (window.DOMPurify ? DOMPurify.sanitize(html) : html);
+
+for (const [title, prompt] of STARTERS) {
+  const button = document.createElement('button');
+  button.className = 'starter';
+  button.innerHTML = `<b>${title}</b><small>${escapeHtml(prompt)}</small>`;
+  button.onclick = () => send(prompt);
+  $('starters').append(button);
+}
+$('form').onsubmit = (e) => {
+  e.preventDefault();
+  send($('input').value);
+  $('input').value = '';
+};
+$('fakeNow').value = fakeNow;
+$('fakeNow').onchange = (e) => {
+  fakeNow = e.target.value;
+  localStorage.setItem('recall.fakeNow', fakeNow);
+  refresh();
+};
+$('newChat').onclick = () => {
+  conversationId = newConversation();
+  showEmpty();
+};
+$('seed').onclick = async () => {
+  const result = await (await fetch('/api/seed', { method: 'POST', headers: fakeNow ? { 'x-fake-now': fakeNow } : {} })).json();
+  $('seed').textContent = result.seeded ? `Demo loaded: ${result.days.length} days` : 'Demo already loaded';
+  refresh();
+};
+loadHistory();
+refresh();
+</script>
+</body>
+</html>
