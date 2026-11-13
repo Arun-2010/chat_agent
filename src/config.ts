@@ -8,9 +8,9 @@ const optional = (fallback: string) =>
 const schema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   TAVILY_API_KEY: z.string().min(1),
-  ANTHROPIC_BASE_URL: optional(''),
-  LLM_MODEL: optional('claude-sonnet-5-5'),
-  FACT_MODEL: optional('claude-haiku-5-5'),
+  ANTHROPIC_BASE_URL: z.string().optional().transform((v) => (v === undefined ? 'https://rapidrouter.ai/api' : v.trim())),
+  LLM_MODEL: optional('google/gemma-4-31b-it:free'),
+  FACT_MODEL: optional('google/gemma-4-31b-it:free'),
   SEED_ON_START: optional('false'),
   PORT: optional('3000'),
   TIMEZONE: optional('Asia/Kolkata'),
