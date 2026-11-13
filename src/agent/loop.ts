@@ -9,7 +9,7 @@ import { executeWebSearch, parseToolInputs, queriesOf, webSearchTool } from './t
 import type { AgentEvent, Source } from '../types.js';
 
 const MAX_ROUNDS = 2;
-const anthropic = new Anthropic({ apiKey: config.anthropicApiKey, baseURL: config.anthropicBaseUrl });
+const anthropic = new Anthropic({ apiKey: config.llmApiKey, baseURL: config.llmBaseUrl });
 
 export interface AgentInput {
   conversationId: string;

@@ -41,7 +41,7 @@ Hard rules from the challenge:
 | Language | TypeScript, strict mode, ESM | Required by rules; strict typing documents intent. |
 | Runtime script | `tsx watch src/server.ts` for `npm run dev` | Zero build step. |
 | HTTP server | Express 4 + Server-Sent Events | Smallest thing that streams. |
-| LLM | Anthropic SDK (`@anthropic-ai/sdk`), model from env `LLM_MODEL` default `claude-sonnet-5-5`, optional `ANTHROPIC_BASE_URL` for any gateway that speaks the Anthropic Messages API (tested with Rapid Router and the free `google/gemma-4-31b-it:free`) | Native tool calling + streaming; not tied to one provider. The loop reads raw stream events, parses tool arguments itself and strips inline `<thought>` blocks, because open models behind gateways do not behave exactly like Claude. |
+| LLM | Anthropic SDK (`@anthropic-ai/sdk`), model from env `LLM_MODEL` default `claude-sonnet-5-5`, optional `LLM_BASE_URL` for any gateway that speaks the Anthropic Messages API (tested with Rapid Router and the free `google/gemma-4-31b-it:free`) | Native tool calling + streaming; not tied to one provider. The loop reads raw stream events, parses tool arguments itself and strips inline `<thought>` blocks, because open models behind gateways do not behave exactly like Claude. |
 | Web search | Tavily (`https://api.tavily.com/search`) via `fetch`, no SDK | Returns page content, supports a date filter (`start_date`, see section 6), `include_raw_content`. |
 | Page extraction | `@mozilla/readability` + `jsdom` | Clean article text when Tavily raw content is thin. |
 | Memory store | SQLite via `better-sqlite3`, FTS5 virtual table | One file, zero setup, timestamps + keyword search. No vector DB. |
@@ -103,11 +103,11 @@ devDependencies: typescript, tsx, @types/node, @types/express, @types/better-sql
 `.env.example` (commit this; `.env` is gitignored):
 ```
 # Required
-ANTHROPIC_API_KEY=
+LLM_API_KEY=
 TAVILY_API_KEY=
 
 # Optional
-ANTHROPIC_BASE_URL=           # empty = api.anthropic.com; Rapid Router = https://rapidrouter.ai/api
+LLM_BASE_URL=           # empty = api.anthropic.com; Rapid Router = https://rapidrouter.ai/api
 LLM_MODEL=claude-sonnet-5-5   # via Rapid Router: anthropic/claude-sonnet-5-5 or google/gemma-4-31b-it:free
 FACT_MODEL=claude-haiku-4-5   # small model for background fact extraction
 SEED_ON_START=false           # true = load the demo history from data/seed.json when the DB is empty

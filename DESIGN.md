@@ -16,7 +16,7 @@ browser ──GET /api/chat (SSE)──▶ server.ts ──▶ agent/loop.ts
 - **Memory is injected, not queried.** Before each model call, code resolves any date phrase in the message, pulls every message from those days verbatim, adds FTS5 topic matches (each hit with its question/answer partner), a 30-day table of contents, known user facts and today's date. The model starts with what it needs, so recall costs zero round trips.
 - **One tool, `web_search`.** One call carries two lists: `queries` (current state, never date filtered) and `news_queries` (limited to the last `days` days). All of them run with `Promise.all` under a 12 s cap; whatever finished is used.
 - **Change detection is a comparison.** For "has pricing changed since Monday" the model looks up current prices and compares them against its stored old answer, and separately searches dated news and launches. A date filter on a pricing page would hide it, because pricing pages have no publish date.
-- **Any model behind the Anthropic Messages API.** `ANTHROPIC_BASE_URL` points the same code at Anthropic or a gateway. It was tested on a free open model (Gemma 4 through Rapid Router), so the loop reads raw stream events, parses tool arguments itself and strips inline `<thought>` reasoning rather than assuming Claude's behaviour.
+- **Any model behind the Anthropic Messages API.** `LLM_BASE_URL` points the same code at Anthropic or a gateway. It was tested on a free open model (Gemma 4 through Rapid Router), so the loop reads raw stream events, parses tool arguments itself and strips inline `<thought>` reasoning rather than assuming Claude's behaviour.
 - **Streaming** over Server-Sent Events: tokens, a "Searching: …" status, sources, done.
 
 ## Why this way

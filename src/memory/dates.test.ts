@@ -71,7 +71,7 @@ test('nothing matches, invalid dates are ignored', () => {
 });
 
 test('FTS match expression quotes terms, joins with OR and drops stopwords and punctuation', async () => {
-  process.env.ANTHROPIC_API_KEY ??= 'test';
+  process.env.LLM_API_KEY ??= 'test';
   process.env.TAVILY_API_KEY ??= 'test';
   process.env.DB_PATH = ':memory:';
   const store = await import('./store.js');

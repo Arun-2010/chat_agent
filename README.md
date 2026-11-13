@@ -24,12 +24,12 @@ npm run dev              # http://localhost:3000
 
 Two keys go in `.env`, and both have a free tier:
 
-| Variable | Where to get it |
-|---|---|
-| `ANTHROPIC_API_KEY` | A [Rapid Router](https://rapidrouter.ai/dashboard/keys) key. The default model, `google/gemma-4-31b-it:free`, is free (50 requests a day). |
-| `TAVILY_API_KEY` | [Tavily](https://tavily.com) |
+| Variable | What it is | Where to get it |
+|---|---|---|
+| `LLM_API_KEY` | Key for the language model | [Rapid Router](https://rapidrouter.ai/dashboard/keys). The default model, `google/gemma-4-31b-it:free`, is free (50 requests a day). |
+| `TAVILY_API_KEY` | Key for web search | [Tavily](https://tavily.com) |
 
-The variable is called `ANTHROPIC_API_KEY` because the code speaks the Anthropic Messages API. Any provider with that API works by changing `ANTHROPIC_BASE_URL` and the model names; `.env.example` shows the settings for Claude.
+The model is reached through Rapid Router by default. To use Claude or another provider, change `LLM_BASE_URL` and the model names; `.env.example` shows the settings. Any endpoint that speaks the Anthropic Messages API works.
 
 ## Trying the memory prompts
 
@@ -98,7 +98,7 @@ All settings live in `.env`; see [.env.example](.env.example).
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ANTHROPIC_BASE_URL` | `https://rapidrouter.ai/api` | Model endpoint. Empty means api.anthropic.com. |
+| `LLM_BASE_URL` | `https://rapidrouter.ai/api` | Model endpoint. Empty means api.anthropic.com. |
 | `LLM_MODEL` | `google/gemma-4-31b-it:free` | Model that answers |
 | `FACT_MODEL` | `google/gemma-4-31b-it:free` | Model for background fact extraction |
 | `TIMEZONE` | `Asia/Kolkata` | Timezone used to decide which day a message belongs to |

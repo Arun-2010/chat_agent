@@ -6,9 +6,9 @@ const optional = (fallback: string) =>
   z.string().optional().transform((v) => (v && v.trim() ? v.trim() : fallback));
 
 const schema = z.object({
-  ANTHROPIC_API_KEY: z.string().min(1),
+  LLM_API_KEY: z.string().min(1),
   TAVILY_API_KEY: z.string().min(1),
-  ANTHROPIC_BASE_URL: z.string().optional().transform((v) => (v === undefined ? 'https://rapidrouter.ai/api' : v.trim())),
+  LLM_BASE_URL: z.string().optional().transform((v) => (v === undefined ? 'https://rapidrouter.ai/api' : v.trim())),
   LLM_MODEL: optional('google/gemma-4-31b-it:free'),
   FACT_MODEL: optional('google/gemma-4-31b-it:free'),
   SEED_ON_START: optional('false'),
@@ -25,9 +25,9 @@ if (!parsed.success) {
 }
 
 export const config = {
-  anthropicApiKey: parsed.data.ANTHROPIC_API_KEY,
+  llmApiKey: parsed.data.LLM_API_KEY,
   tavilyApiKey: parsed.data.TAVILY_API_KEY,
-  anthropicBaseUrl: parsed.data.ANTHROPIC_BASE_URL || undefined,
+  llmBaseUrl: parsed.data.LLM_BASE_URL || undefined,
   model: parsed.data.LLM_MODEL,
   factModel: parsed.data.FACT_MODEL,
   seedOnStart: parsed.data.SEED_ON_START === 'true',
