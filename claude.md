@@ -41,7 +41,7 @@ Hard rules from the challenge:
 | Language | TypeScript, strict mode, ESM | Required by rules; strict typing documents intent. |
 | Runtime script | `tsx watch src/server.ts` for `npm run dev` | Zero build step. |
 | HTTP server | Express 4 + Server-Sent Events | Smallest thing that streams. |
-| LLM | Anthropic SDK (`@anthropic-ai/sdk`), model from env `LLM_MODEL` default `claude-sonnet-4-5` | Native tool calling + streaming. |
+| LLM | Anthropic SDK (`@anthropic-ai/sdk`), model from env `LLM_MODEL` default `claude-sonnet-5-5`, optional `ANTHROPIC_BASE_URL` for any gateway that speaks the Anthropic Messages API (tested with Rapid Router and the free `google/gemma-4-31b-it:free`) | Native tool calling + streaming; not tied to one provider. The loop reads raw stream events, parses tool arguments itself and strips inline `<thought>` blocks, because open models behind gateways do not behave exactly like Claude. |
 | Web search | Tavily (`https://api.tavily.com/search`) via `fetch`, no SDK | Returns page content, supports a date filter (`start_date`, see section 6), `include_raw_content`. |
 | Page extraction | `@mozilla/readability` + `jsdom` | Clean article text when Tavily raw content is thin. |
 | Memory store | SQLite via `better-sqlite3`, FTS5 virtual table | One file, zero setup, timestamps + keyword search. No vector DB. |
@@ -107,7 +107,8 @@ ANTHROPIC_API_KEY=
 TAVILY_API_KEY=
 
 # Optional
-LLM_MODEL=claude-sonnet-4-5
+ANTHROPIC_BASE_URL=           # empty = api.anthropic.com; Rapid Router = https://rapidrouter.ai/api
+LLM_MODEL=claude-sonnet-5-5   # via Rapid Router: anthropic/claude-sonnet-5-5 or google/gemma-4-31b-it:free
 FACT_MODEL=claude-haiku-4-5   # small model for background fact extraction
 SEED_ON_START=false           # true = load the demo history from data/seed.json when the DB is empty
 PORT=3000
@@ -232,15 +233,16 @@ Tool schema given to the model (single tool, as the challenge requires):
 ```json
 {
   "name": "web_search",
-  "description": "Search the web. Pass several focused queries at once when the question has several parts (e.g. one per product). Set days only on calls looking for news or announcements 'since' a date; never set it when looking up a current price or pricing page, because those pages have no publish date. Use two separate calls in the same turn when you need both.",
+  "description": "Search the web. Pass several focused queries at once when the question has several parts (e.g. one per product). Put lookups of the current state (prices, pricing pages, versions) in queries; they are never date filtered. Put searches for news, launches and announcements since a date in news_queries and set days; only those are limited to the last N days.",
   "input_schema": {
     "type": "object",
     "properties": {
-      "queries": { "type": "array", "items": { "type": "string" }, "minItems": 1, "maxItems": 8 },
-      "days": { "type": "integer", "description": "Only return results published within the last N days. Omit for no limit." },
+      "queries": { "type": "array", "items": { "type": "string" }, "maxItems": 8 },
+      "news_queries": { "type": "array", "items": { "type": "string" }, "maxItems": 8 },
+      "days": { "type": "integer", "description": "How many days back news_queries should look. Omit for no limit." },
       "reason": { "type": "string", "description": "One line on what you are trying to find out." }
     },
-    "required": ["queries"]
+    "required": []
   }
 }
 ```
@@ -270,7 +272,7 @@ Compose: persona + rules + memory context. Rules the prompt must contain, verbat
 - You are Recall, a concise, friendly research assistant with one tool: `web_search`. Today's date is in the context; trust it over your training data.
 - **When to search:** anything about prices, releases, news, versions, "has X changed", or anything after your training cutoff. Do not search for greetings, opinions, or things fully answered by memory.
 - **Fan out:** if the question covers several items (e.g. 5 CRM tools), issue one query per item in a single `web_search` call.
-- **Detecting change "since" a date:** make two `web_search` calls in the same turn. (a) Unfiltered, one query per item for its **current** price/pricing page; compare what you find against the figures in your stored earlier answer — that comparison is the evidence of a price change. (b) With `days` equal to the days since the referenced date, one query per item for news, launches and announcements. Do not put `days` on pricing lookups.
+- **Detecting change "since" a date:** make **one** `web_search` call that fills both lists (parallel tool calls proved unreliable on open models). (a) `queries`: one per item for its **current** price/pricing page; compare what you find against the figures in your stored earlier answer — that comparison is the evidence of a price change. (b) `news_queries` with `days` equal to the days since the referenced date: one per item for news, launches and announcements. Never put pricing lookups in `news_queries`.
 - **Memory:** the context shows past conversations with dates. When the user refers to an earlier day, quote what they asked and what you answered before checking if it still holds. If memory has nothing for that date, say so plainly and ask what they remember — never invent a past conversation.
 - **Verification answers** ("is your answer still correct?"): structure as *What you asked* → *What I said then* → *What I find now* → *Verdict* (Still correct / Changed: … / Could not verify).
 - **Honesty:** if search finds no evidence of a change, say "I found no announced change" and cite what you checked. Never fabricate prices or dates. Distinguish "no change" from "could not find".
