@@ -6,7 +6,7 @@ Design notes are in [DESIGN.md](DESIGN.md).
 ## Run
 
 ```
-cp .env.example .env    # then set ANTHROPIC_API_KEY and TAVILY_API_KEY
+cp .env.example .env    # then set ANTHROPIC_API_KEY and TAVILY_API_KEY (see .env.example for using a gateway such as Rapid Router)
 npm install
 npm run dev             # http://localhost:3000
 ```

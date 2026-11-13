@@ -8,8 +8,9 @@ const optional = (fallback: string) =>
 const schema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   TAVILY_API_KEY: z.string().min(1),
-  LLM_MODEL: optional('claude-sonnet-4-5'),
-  FACT_MODEL: optional('claude-haiku-4-5'),
+  ANTHROPIC_BASE_URL: optional(''),
+  LLM_MODEL: optional('claude-sonnet-5-5'),
+  FACT_MODEL: optional('claude-haiku-5-5'),
   SEED_ON_START: optional('false'),
   PORT: optional('3000'),
   TIMEZONE: optional('Asia/Kolkata'),
@@ -26,6 +27,7 @@ if (!parsed.success) {
 export const config = {
   anthropicApiKey: parsed.data.ANTHROPIC_API_KEY,
   tavilyApiKey: parsed.data.TAVILY_API_KEY,
+  anthropicBaseUrl: parsed.data.ANTHROPIC_BASE_URL || undefined,
   model: parsed.data.LLM_MODEL,
   factModel: parsed.data.FACT_MODEL,
   seedOnStart: parsed.data.SEED_ON_START === 'true',

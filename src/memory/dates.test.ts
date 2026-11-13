@@ -86,3 +86,12 @@ test('FTS match expression quotes terms, joins with OR and drops stopwords and p
   assert.equal(store.getTurnPartner(hits[0]!)?.role, 'assistant');
   assert.deepEqual(store.searchTopic('???'), []);
 });
+
+test('tool arguments: one object, several objects back to back, and garbage', async () => {
+  const { parseToolInputs, queriesOf } = await import('../agent/tools.js');
+  assert.deepEqual(parseToolInputs('{"queries":["a"]}'), [{ queries: ['a'] }]);
+  assert.deepEqual(parseToolInputs('{"queries":["a {b}"]}{"news_queries":["c \\"d\\""],"days":9}'), [{ queries: ['a {b}'] }, { news_queries: ['c "d"'], days: 9 }]);
+  assert.deepEqual(parseToolInputs('not json'), [{}]);
+  assert.deepEqual(queriesOf({ queries: ['a'], news_queries: ['b', 'a'] }), ['a', 'b']);
+  assert.deepEqual(queriesOf({}), []);
+});

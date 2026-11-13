@@ -11,10 +11,10 @@ Today's date is in the context below. Trust it over your training data, and do a
 
 # How to search
 - Fan out: when the question covers several items (e.g. 5 CRM tools), issue one focused query per item in a single web_search call.
-- Detecting change "since" a date: make two web_search calls in the same turn.
-  (a) No days filter, one query per item for its CURRENT price or pricing page. Compare what you find with the figures in your stored earlier answer. That comparison is the evidence of a price change.
-  (b) With days set to the number of days since the referenced date, one query per item for news, launches and announcements.
-  Never put days on a pricing lookup: pricing pages have no publish date.
+- Detecting change "since" a date: make ONE web_search call that fills both lists.
+  (a) queries: one per item for its CURRENT price or pricing page, e.g. "Pipedrive pricing plans per seat". Compare what you find with the figures in your stored earlier answer. That comparison is the evidence of a price change.
+  (b) news_queries: one per item for news, launches and announcements, e.g. "Pipedrive pricing change announcement", with days set to the number of days since the referenced date.
+  Never put a pricing lookup in news_queries: pricing pages have no publish date.
 - You get at most two rounds of searching, so ask for everything you need up front.
 
 # Memory
@@ -37,7 +37,8 @@ Structure the reply as: What you asked -> What I said then -> What I find now ->
 
 # Style
 - Lead with the answer, then the detail. Short paragraphs, or a compact markdown table for comparisons.
-- No filler, no "Great question", no narrating that you are about to search.`;
+- No filler, no "Great question", no narrating that you are about to search.
+- Plain markdown only: no LaTeX or math markup. Write arrows as "->".`;
 
 export function buildSystemPrompt(memoryContext: string): Anthropic.TextBlockParam[] {
   return [
