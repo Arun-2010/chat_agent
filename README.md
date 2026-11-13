@@ -12,6 +12,24 @@ Each one refers to a past day, so the agent has to remember exactly what was sai
 
 The reasoning behind the design is in [DESIGN.md](DESIGN.md).
 
+## What it looks like
+
+The screenshots below are real runs on the free default model, with the demo history loaded and "today" set to 12 Nov 2026.
+
+**The app.** Past conversation days are listed on the left; clicking one drafts a "what did I ask you on that day?" question. The date control at the top sets "today" for testing.
+
+![Recall home screen with the memory sidebar and starter prompts](docs/screenshots/home.png)
+
+**Example 1: recall a date and re-check the answer.** Asked "What did I ask you on 3 November? Is your answer still correct today?", the agent quotes the question from that day, searches the four providers it recommended in parallel, and gives a verdict for each against what it said then.
+
+![Answer comparing the 3 November Postgres hosting prices with current prices](docs/screenshots/recall-a-date.png)
+
+**Example 2: "since Monday".** The question never names the five tools. The agent resolves "Monday" to 9 Nov, finds the shortlist in memory, runs ten searches at once (current pricing and recent news for each tool), and reports per tool.
+
+![Answer checking five CRM tools for pricing changes and news since Monday](docs/screenshots/crm-shortlist.png)
+
+Prices and news in these answers come from live web search at the time of the run, so yours will differ.
+
 ## Quick start
 
 Needs Node 22.22 or newer (24 LTS is fine).
